@@ -5,20 +5,42 @@ Werkzeug Documentation:  https://werkzeug.palletsprojects.com/
 This file creates your application.
 """
 
-from app import app
+from app import app,db
 from flask import render_template, request, jsonify, send_file
 import os
+from app.models import Posts
+from app.forms import PostsForm
 
 
 ###
 # Routing for your application.
 ###
 
-@app.route('/')
-def index():
-    return jsonify(message="This is the beginning of our API")
-
-
+@app.route('/api/users/<user_id>/posts', methods =['POST'])
+def add_post(user_id):
+    form =  PostsForm()
+    
+    if form.validate_on_submit():
+        uid = form.id.data
+        photo = form.photo.data
+        cap_tion = form.caption.data
+        
+        user = user.query.filter_by(id=uid).first()
+        
+        filename = user.username+secure_filename(photo.filename)
+        
+        datecreated = str(datetime.date.today())
+        
+        new_post = Posts(user_id=uid, photo=filename, caption=cap_tion, created_on=datecreated) 
+        
+        photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        
+        db.session.add(new_post)
+        db.commit()
+        
+        return jsonify(message="New Post Successfully created!")
+    return jsonify(errors=form_errors(form))
+    
 ###
 # The functions below should be applicable to all Flask apps.
 ###
