@@ -5,10 +5,9 @@ Werkzeug Documentation:  https://werkzeug.palletsprojects.com/
 This file creates your application.
 """
 
-from app import app
-from app import db
 from flask import render_template, request, jsonify, send_file
 import os
+import psycopg2
 from .forms import RegisterForm, LoginForm, PostsForm
 from app.models import Users
 from werkzeug.utils import secure_filename
@@ -16,6 +15,7 @@ from flask_wtf.csrf import generate_csrf
 from werkzeug.security import check_password_hash
 from app import app, db, login_manager
 from flask_login import login_user, logout_user, current_user, login_required
+from werkzeug.security import generate_password_hash
 
 ###
 # Routing for your application.
@@ -61,12 +61,15 @@ def login():
 
             username = form.username.data
             password = form.password.data
-
+        
             user = db.session.execute(db.select(Users).filter_by(username=username)).scalar()
 
-            if user is not None and check_password_hash(user.password, password):
-                login_user(user)
+            # return jsonify({"message": check_password_hash(user.password,password)})
 
+            if user is not None and check_password_hash(user.password, password):
+
+                login_user(user)
+                
                 return jsonify({"message": "Login Successfull"})
         else:
             return jsonify({"errors": form_errors(form)})
@@ -77,6 +80,14 @@ def logout():
     logout_user()
     return jsonify({"message": "Logout Successfull"})
 
+@app.route('/api/return/data', methods=['GET'])
+def show():
+    DB = connect_db()
+    cur = DB.cursor()
+    cur.execute(f'select * from users')
+    users = cur.fetchall()
+
+    return jsonify({"users": users})
 ###
 # The functions below should be applicable to all Flask apps.
 ###
@@ -123,3 +134,10 @@ def page_not_found(error):
 @app.route('/api/v1/csrf-token', methods=['GET'])
 def get_csrf():
     return jsonify({'csrf_token': generate_csrf()})
+
+def connect_db():
+    return psycopg2.connect(host="localhost", database="project2", user="project2", password="Wewillpass2023")
+
+@login_manager.user_loader
+def load_user(id):
+    return db.session.execute(db.select(Users).filter_by(id=id)).scalar()
