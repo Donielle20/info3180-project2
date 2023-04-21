@@ -27,9 +27,13 @@
               <RouterLink class="nav-link active" to="/register/user">Register</RouterLink>
             </li>
 
-            <li class="nav-item">
+            <li v-if="loggedin" class="nav-item">
+              <RouterLink class="nav-link active" to="/user/logout">Logout</RouterLink>
+            </li>
+            <li v-else class="nav-item">
               <RouterLink class="nav-link active" to="/user/login">Login</RouterLink>
             </li>
+
           </ul>
         </div>
       </div>
@@ -39,14 +43,29 @@
 
 <script setup>
   import { RouterLink } from "vue-router";
-  import { computed } from "vue";
-  import { useStore } from "vuex";
+  import { ref } from "vue";
 
-  const store = useStore();
+  let token = localStorage.getItem('token');
+  let loggedin = ref(false);
+  // console.log(token);
+  //localStorage.clear();
 
-  const isLoggedIn = computed(() => {
-    return store.state.currentUser !== null;
-  });
+  if (token == null)
+  {
+    loggedin.value = false;
+    console.log(loggedin.value)
+  }
+  else
+  {
+    loggedin.value = true;
+    console.log(loggedin.value)
+  }
+
+
+  function logout()
+  {
+    console.log("SUCCESS");
+  }
 </script>
 
 <style>

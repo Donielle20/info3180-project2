@@ -16,10 +16,45 @@ from werkzeug.security import check_password_hash
 from app import app, db, login_manager
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash
-
+import jwt
+from functools import wraps
+import base64
+from time import time
+from datetime import datetime, timedelta
 ###
 # Routing for your application.
 ###
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.headers.get('Authorization', None)
+        if not auth:
+            return jsonify({'code': 'authorization_header_missing', 'description': 'Authorization header is expected'}), 401
+
+        parts = auth.split()
+
+        if parts[0].lower() != 'bearer':
+            return jsonify({'code': 'invalid_header', 'description': 'Authorization header must start with Bearer'}), 401
+        elif len(parts) == 1:
+            return jsonify({'code': 'invalid_header', 'description': 'Token not found'}), 401
+        elif len(parts) > 2:
+            return jsonify({'code': 'invalid_header', 'description': 'Authorization header must be Bearer + \s + token'}), 401
+
+        token = parts[1]
+
+        try:
+            payload = jwt.decode(token, app.config['SECRET_KEY'])
+
+        except jwt.ExpiredSignature:
+            return jsonify({'code': 'token_expired', 'description': 'token is expired'}), 401
+        except jwt.DecodeError:
+            return jsonify({'code': 'token_invalid_signature', 'description': 'Token signature is invalid'}), 401
+
+        g.current_user = user = payload
+        return f(*args, **kwargs)
+
+    return decorated
 
 @app.route('/')
 def index():
@@ -76,16 +111,17 @@ def login():
         
 @app.route('/api/v1/auth/logout', methods=['POST'])
 @login_required
+@requires_auth
 def logout():
     logout_user()
     return jsonify({"message": "Logout Successfull"})
 
-@app.route('/api/return/data', methods=['GET'])
-def show():
-    DB = connect_db()
-    cur = DB.cursor()
-    cur.execute(f'select * from users')
-    users = cur.fetchall()
+# @app.route('/api/return/data', methods=['GET'])
+# def show():
+#     DB = connect_db()
+#     cur = DB.cursor()
+#     cur.execute(f'select * from users')
+#     users = cur.fetchall()
 
     return jsonify({"users": users})
 ###
@@ -141,3 +177,16 @@ def connect_db():
 @login_manager.user_loader
 def load_user(id):
     return db.session.execute(db.select(Users).filter_by(id=id)).scalar()
+
+@app.route("/api/v1/generate-token")
+def generate_token():
+    timestamp = datetime.utcnow()
+    payload = {
+        "sub": 1,
+        "iat": timestamp,
+        "exp": timestamp + timedelta(minutes=3)
+    }
+
+    token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
+
+    return jsonify(token=token)

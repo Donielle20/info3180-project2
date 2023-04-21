@@ -19,6 +19,7 @@
 <script setup>
     import { ref, onMounted  } from "vue";
     let csrf_token = ref("");
+    let auth_token = ref("");
 
     onMounted(() => {
         getCsrfToken();
@@ -42,7 +43,14 @@
                 })
                 .then(function (data) {
 
-                    console.log(data);
+                    console.log(data.message);
+                    if (data.message == "Login Successfull")
+                    {
+                        getAuthorizationToken();
+                        window.location.href = 'http://localhost:5173/';
+                        // let token = localStorage.getItem('token');
+                        // console.log(token);
+                    }
                 })
                 .catch(function (error) {
                     console.log(error);
@@ -56,6 +64,17 @@
                 .then((data) => {
                     console.log(data.csrf_token);
                     csrf_token.value = data.csrf_token;
+        })
+    }
+
+    function getAuthorizationToken() 
+    {
+        fetch('/api/v1/generate-token')
+            .then((response) => response.json())
+                .then((data) => {
+                    // console.log(data.token);
+                    // auth_token.value = data.token;
+                    localStorage.setItem('token', data.token);
         })
     }
 
