@@ -1,18 +1,23 @@
 <template>
     <div class="container-fluid">
-        <form @submit.prevent="loginUser" id="UserForm">
-            <div class="form-group mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input id="first" type="text" name="username" class="form-control" />
-            </div>
+        <div class="r_form">
+            <h5>Login</h5>
+            <form @submit.prevent="loginUser" id="UserForm">
+                <div class="form-group mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input id="first" type="text" name="username" class="form-control" />
+                </div>
 
-            <div class="form-group mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input id="second" type="password" name="password" class="form-control" />
-            </div>
+                <div class="form-group mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input id="second" type="password" name="password" class="form-control" />
+                </div>
 
-            <input type="submit" class="btn btn-primary" value="Submit">
-        </form>
+                <br>
+
+                <input id="btn_length" type="submit" value="Login">
+            </form>
+        </div>
     </div>
 </template>
 
@@ -48,8 +53,16 @@
                     {
                         getAuthorizationToken();
                         window.location.href = 'http://localhost:5173/';
-                        // let token = localStorage.getItem('token');
-                        // console.log(token);
+                        let list = [data.user_id,data.username,data.firstname,data.lastname,data.location,data.biography,data.photo,data.joined_on];
+                        // console.log(data.user_id);
+                        // console.log(data.username);
+                        // console.log(data.firstname);
+                        // console.log(data.lastname);
+                        // console.log(data.location);
+                        // console.log(data.biography);
+                        // console.log(data.photo);
+                        // console.log(data.joined_on);
+                        localStorage.setItem('user', list);
                     }
                 })
                 .catch(function (error) {
@@ -79,3 +92,7 @@
     }
 
 </script>
+
+<style>
+
+</style>

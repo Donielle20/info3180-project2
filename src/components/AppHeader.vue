@@ -32,7 +32,7 @@
             </li>
 
             <li v-if="loggedin" class="nav-item">
-              <RouterLink class="nav-link active" to="/user/logout">My Profile</RouterLink>
+              <RouterLink class="nav-link active" to="/user/profile">My Profile</RouterLink>
             </li>
 
             <li v-if="loggedin" class="nav-item">

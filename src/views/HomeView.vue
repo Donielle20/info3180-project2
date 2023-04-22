@@ -109,7 +109,7 @@ let message = ref("Hello World! This is a VueJS and Flask Starter Template.")
     box-shadow: 3px 3px 3px rgb(191, 197, 199);
     border: 2px solid rgb(191, 197, 199);
     padding: 30px;
-
+    background-color: rgb(244, 242, 242);
   }
 
   .contain{

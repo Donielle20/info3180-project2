@@ -105,7 +105,7 @@ def login():
 
                 login_user(user)
                 
-                return jsonify({"message": "Login Successfull"})
+                return jsonify({"message": "Login Successfull", "user_id": user.id, "username": user.username, "firstname": user.firstname, "lastname": user.lastname, "location": user.location, "biography": user.biography, "photo": user.photo, "joined_on": user.joined_on})
         else:
             return jsonify({"errors": form_errors(form)})
         

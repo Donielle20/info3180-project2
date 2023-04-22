@@ -1,48 +1,69 @@
 <template>
     <div class="container-fluid">
-        <form @submit.prevent="saveUser" id="RegisterForm">
-            <div class="form-group mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input id="first" type="text" name="username" class="form-control" />
-            </div>
+        <div class="r_form">
+            <h5>Register</h5>
+            <form @submit.prevent="saveUser" id="RegisterForm">
+                <div class="col-12">
+                    <label for="username" class="form-label">Username</label>
+                    <input id="first" type="text" name="username" class="form-control" />
+                </div>
 
-            <div class="form-group mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input id="second" type="password" name="password" class="form-control" />
-            </div>
+                <br>
 
-            <div class="form-group mb-3">
-                <label for="firstname" class="form-label">Firstname</label>
-                <input id="third" type="text" name="firstname" class="form-control" />
-            </div>
+                <div class="col-12">
+                    <label for="password" class="form-label">Password</label>
+                    <input id="second" type="password" name="password" class="form-control" />
+                </div>
 
-            <div class="form-group mb-3">
-                <label for="lastname" class="form-label">Lastname</label>
-                <input id="fourth" type="text" name="lastname" class="form-control" />
-            </div>
+                <br>
 
-            <div class="form-group mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input id="fifth" type="text" name="email" class="form-control" />
-            </div>
+                <div class="col-12">
+                    <label for="firstname" class="form-label">Firstname</label>
+                    <input id="third" type="text" name="firstname" class="form-control" />
+                </div>
 
-            <div class="form-group mb-3">
-                <label for="location" class="form-label">Location</label>
-                <input id="sixth" type="text" name="location" class="form-control" />
-            </div>
+                <br>
 
-            <div class="form-group mb-3">
-                <label for="biography" class="form-label">Biography</label>
-                <input id="seventh" type="text" name="biography" class="form-control" />
-            </div>
+                <div class="col-12">
+                    <label for="lastname" class="form-label">Lastname</label>
+                    <input id="fourth" type="text" name="lastname" class="form-control" />
+                </div>
 
-            <div class="form-group mb-3">
-                <label for="photo" class="form-label">Photo</label>
-                <input id="eighth" type="file" name="photo" class="form-control" />
-            </div>
+                <br>
 
-            <input type="submit" class="btn btn-primary" value="Register">
-        </form>
+                <div class="col-12">
+                    <label for="email" class="form-label">Email</label>
+                    <input id="fifth" type="text" name="email" class="form-control" />
+                </div>
+
+                <br>
+
+                <div class="col-12">
+                    <label for="location" class="form-label">Location</label>
+                    <input id="sixth" type="text" name="location" class="form-control" />
+                </div>
+
+                <br>
+
+                <div class="col-12">
+                    <label for="biography" class="form-label">Biography</label>
+                    <input id="seventh" type="text" name="biography" class="form-control" />
+                </div>
+
+                <br>
+
+                <div class="col-12">
+                    <label for="photo" class="form-label">Photo</label>
+                    <input id="eighth" type="file" name="photo" class="form-control" />
+                </div>
+
+                <br>
+
+                <div class="col-12">
+                    <input id="btn_length" type="submit" value="Register">
+                </div>
+            </form>
+        </div>
     </div>
 </template>
 
@@ -89,3 +110,29 @@
         })
     }
 </script>
+
+<style>
+    .r_form{
+        width: 400px;
+    }
+    .container-fluid{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    form{
+        padding: 2em;
+        box-shadow: 3px 3px 3px rgb(191, 197, 199);
+        border-radius: 5px;
+        border: 2px solid rgb(191, 197, 199);
+        background-color: rgb(244, 242, 242);
+    }
+    #btn_length{
+        width: 100%;
+        height: 40px;
+        border-radius: 5px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+    }
+</style>
