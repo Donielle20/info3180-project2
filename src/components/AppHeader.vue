@@ -23,8 +23,16 @@
             <!-- <li class="nav-item">
               <RouterLink class="nav-link" to="/about">About</RouterLink>
             </li> -->
-            <li class="nav-item">
+            <li v-if="!loggedin" class="nav-item">
               <RouterLink class="nav-link active" to="/register/user">Register</RouterLink>
+            </li>
+
+            <li v-if="loggedin" class="nav-item">
+              <RouterLink class="nav-link active" to="/user/logout">Explore</RouterLink>
+            </li>
+
+            <li v-if="loggedin" class="nav-item">
+              <RouterLink class="nav-link active" to="/user/logout">My Profile</RouterLink>
             </li>
 
             <li v-if="loggedin" class="nav-item">

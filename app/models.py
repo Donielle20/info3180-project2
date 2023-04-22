@@ -49,3 +49,63 @@ class Users(db.Model):
 
     def __repr__(self):
         return '<User %r>' % (self.username)
+    
+class Posts(db.Model):
+    __tablename__= "posts"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(Users.id, ondelete='CASCADE'), nullable=False)
+    photo = db.Column(db.String(200), nullable=False)
+    caption = db.Column(db.String(1000), nullable=False)
+    created_on = db.Column(db.DateTime, nullable=False,)
+
+    #relationship between posts and likes
+    likes= db.relationship('Likes', backref='Posts', passive_deletes= True, lazy=True)
+
+    def __init__(self, user_id, photo, caption):
+        self.photo= photo
+        self.caption= caption
+        self.user_id= user_id
+        self.created_on= datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    def get_id(self):
+        try:
+            return unicode(self.id)  # python 2 support
+        except NameError:
+            return str(self.id)  # python 3 support
+        
+class Likes(db.Model):
+    __tablename__ = "likes"
+    __table_args__ = (db.UniqueConstraint('user_id', 'post_id', name='_user_post_uc'), )
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(Users.id, ondelete='CASCADE'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey(Posts.id, ondelete='CASCADE'), nullable=False)
+
+    def __init__(self, user_id, post_id):
+        self.user_id = user_id
+        self.post_id = post_id
+
+    def get_id(self):
+        try:
+            return unicode(self.id)  # python 2 support
+        except NameError:
+            return str(self.id)  # python 3 support
+        
+class Follows(db.Model):
+    __tablename__ = "follows"
+    __table_args__ = (db.UniqueConstraint('user_id', 'follower_id', name='_user_follower_uc'), )
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(Users.id, ondelete='CASCADE'), nullable=False)
+    follower_id = db.Column(db.Integer, nullable=False)
+
+    def __init__(self, follower_id, user_id):
+        self.follower_id = follower_id
+        self.user_id = user_id
+
+    def get_id(self):
+        try:
+            return unicode(self.id)  # python 2 support
+        except NameError:
+            return str(self.id) # python 3 support

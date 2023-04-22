@@ -9,7 +9,7 @@ from flask import render_template, request, jsonify, send_file
 import os
 import psycopg2
 from .forms import RegisterForm, LoginForm, PostsForm
-from app.models import Users
+from app.models import Users, Posts
 from werkzeug.utils import secure_filename
 from flask_wtf.csrf import generate_csrf
 from werkzeug.security import check_password_hash
@@ -116,6 +116,31 @@ def logout():
     logout_user()
     return jsonify({"message": "Logout Successfull"})
 
+
+@app.route('/api/users/<user_id>/posts', methods =['POST'])
+def add_post(user_id):
+    form =  PostsForm()
+
+    if request.method == 'POST':
+        if form.validate_on_submit():
+
+            user_id = user_id
+
+            photo = form.photo.data
+            caption = form.caption.data
+            
+            filename = secure_filename(photo.filename)
+            
+            new_post = Posts(user_id=user_id, photo=filename, caption=caption) 
+            db.session.add(new_post)
+            db.session.commit()
+            
+            photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            
+            return jsonify({"message":"New Post Successfully created!"})
+        else:
+            return jsonify(errors=form_errors(form))
+
 # @app.route('/api/return/data', methods=['GET'])
 # def show():
 #     DB = connect_db()
@@ -123,7 +148,7 @@ def logout():
 #     cur.execute(f'select * from users')
 #     users = cur.fetchall()
 
-    return jsonify({"users": users})
+    # return jsonify({"users": users})
 ###
 # The functions below should be applicable to all Flask apps.
 ###
