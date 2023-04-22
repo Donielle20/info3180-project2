@@ -27,7 +27,7 @@
                 <br>
 
                 <div class="button">
-                    <button class="new_posts">New Post</button>
+                    <button v-on:click="post" class="new_posts">New Post</button>
                 </div>
             </div>
         </div>
@@ -36,9 +36,17 @@
 
 <script setup>
     let user = localStorage.getItem('user');
-    let item = user.split(",");
-    let date = item[9].split(" ");
-    console.log(user);
+    if (user != null)
+    {
+        let item = user.split(",");
+        let date = item[9].split(" ");
+    }
+    
+    // console.log(user);
+    function post()
+    {
+        console.log("HelloWorld");
+    }
 </script>
 
 <style>

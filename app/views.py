@@ -46,7 +46,7 @@ def requires_auth(f):
         try:
             payload = jwt.decode(token, app.config['SECRET_KEY'])
 
-        except jwt.ExpiredSignature:
+        except jwt.ExpiredSignatureError:
             return jsonify({'code': 'token_expired', 'description': 'token is expired'}), 401
         except jwt.DecodeError:
             return jsonify({'code': 'token_invalid_signature', 'description': 'Token signature is invalid'}), 401
@@ -118,6 +118,8 @@ def logout():
 
 
 @app.route('/api/users/<user_id>/posts', methods =['POST'])
+@login_required
+@requires_auth
 def add_post(user_id):
     form =  PostsForm()
 
