@@ -7,14 +7,28 @@ This file creates your application.
 
 from app import app,db
 from flask import render_template, request, jsonify, send_file
+from flask_login import current_user, login_required
 import os
-from app.models import Posts
+from app.models import Posts, Users
 from app.forms import PostsForm
 
 
 ###
 # Routing for your application.
 ###
+
+@app.route('/api/users/<user_id>', methods =['GET'])
+@login_required
+def ViewProfile(user_id):
+    user = db.session.query(Users).filter_by(id=user_id).first()
+    following = current_user.id in [follower.follower_id for follower in user.followers]
+    
+    currProfile = {"id": user.id, "username":user.usermame, "firstname":user.first_name,
+                  "email": user.email, "location": user.location, "biography": user.biography,
+                  "profile_photo": os.path.join('./uploads', user.profile_photo), "joined":
+                    user.joined_on.strftime("%b %Y"), "following": following, "posts":[]}
+    
+    return jsonify(user=currProfile)
 
 @app.route('/api/users/<user_id>/posts', methods =['POST'])
 def add_post(user_id):
@@ -25,7 +39,7 @@ def add_post(user_id):
         photo = form.photo.data
         cap_tion = form.caption.data
         
-        user = user.query.filter_by(id=uid).first()
+        user = db.session.query(Posts).filter_by(id=user_id).first()
         
         filename = user.username+secure_filename(photo.filename)
         
