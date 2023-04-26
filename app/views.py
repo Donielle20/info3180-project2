@@ -8,11 +8,53 @@ This file creates your application.
 from app import app
 from flask import render_template, request, jsonify, send_file
 import os
+from flask_login import current_user
+from app.models import Follows, Users
 
 
 ###
 # Routing for your application.
 ###
+
+# following a target user #
+@app.route("/api/users/<user_id>/follow", methods=["POST"])
+@requires_auth
+def follow(user_id):
+    current_user = Users.query.filter_by(id=user_id).first()
+    if(not current_user):
+        return jsonify({
+            "error": "Oops looks like user does not exist"
+        })
+    
+    data = request.get_json()
+    print(data)
+    target_id = data['follow_id']
+    print(target_id)
+    targetuser = Users.query.filter_by(id=target_id).first()
+
+    follow = Follows(follower=targetuser, current_user=current_user)
+    db.session.add(follow)
+    db.session.commit()
+
+    return jsonify({
+        "message": "You are now following " + targetuser.username
+    })
+
+# number of followers #
+@app.route("/api/users/<user_id>/follow", methods=["GET"])
+@requires_auth
+def followers(user_id):
+    current_user = Users.query.filter_by(id=user_id).first()
+
+    if(not current_user):
+        return jsonify({
+            "error": "Oops looks like user does not exist"
+        })
+    
+    return jsonify({
+        "followers": len(current_user.following)
+    })
+
 
 @app.route('/')
 def index():
