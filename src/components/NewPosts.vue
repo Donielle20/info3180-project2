@@ -1,4 +1,12 @@
 <template>
+    <div v-if="success" class="alert alert-success">
+        <h6>Posts Upload Successful</h6>
+    </div>
+
+    <div v-if="fail" class="alert alert-danger">
+        <li v-for="error in error_message">{{error}}</li>
+    </div>
+    
     <div class="container-fluid">
         <div class="r_form">
             <h5>New Post</h5>
@@ -28,9 +36,14 @@
     let item = user.split(",");
     let token = ref("");
     token.value = localStorage.getItem('token');
+    let success = ref(false);
+    let fail = ref(false);
+    let error_message = ref('');
 
     onMounted(() => {
         getCsrfToken();
+        success.value = false;
+        fail.value = false;
     });
 
     function userPost()
@@ -54,6 +67,21 @@
 
                     console.log(data.message);
 
+                    let i = 0;
+
+                    for (i in data)
+                    {
+                        error_message = data[i];
+                    }
+
+                    if(document.getElementById('first').value == "" || document.getElementById('second').value == "")
+                    {
+                        fail.value = true;
+                    }
+                    else
+                    {
+                        success.value = true;
+                    }
                     // console.log(data.message);
                     // if (data.message == "Login Successfull")
                     // {
