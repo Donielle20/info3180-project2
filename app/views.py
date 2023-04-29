@@ -5,11 +5,11 @@ Werkzeug Documentation:  https://werkzeug.palletsprojects.com/
 This file creates your application.
 """
 
-from flask import render_template, request, jsonify, send_file
+from flask import render_template, request, jsonify, send_file, g
 import os
 import psycopg2
 from .forms import RegisterForm, LoginForm, PostsForm
-from app.models import Users, Posts
+from app.models import Users, Posts,Likes,Follows
 from werkzeug.utils import secure_filename
 from flask_wtf.csrf import generate_csrf
 from werkzeug.security import check_password_hash
@@ -44,7 +44,8 @@ def requires_auth(f):
         token = parts[1]
 
         try:
-            payload = jwt.decode(token, app.config['SECRET_KEY'])
+            app.logger.debug(app.config['SECRET_KEY'])
+            payload = jwt.decode(token, app.config['SECRET_KEY'],algorithms=['HS256'])
 
         except jwt.ExpiredSignatureError:
             return jsonify({'code': 'token_expired', 'description': 'token is expired'}), 401
@@ -105,20 +106,17 @@ def login():
 
                 login_user(user)
                 
-                return jsonify({"message": "Login Successfull", "user_id": user.id, "username": user.username, "firstname": user.firstname, "lastname": user.lastname, "location": user.location, "biography": user.biography, "photo": user.photo, "joined_on": user.joined_on})
+                return jsonify({"message": "Login Successfull","user_id": user.id, "username": user.username, "firstname": user.firstname, "lastname": user.lastname, "location": user.location, "biography": user.biography, "photo": user.photo, "joined_on": user.joined_on})
         else:
             return jsonify({"errors": form_errors(form)})
         
 @app.route('/api/v1/auth/logout', methods=['POST'])
-@login_required
 @requires_auth
 def logout():
     logout_user()
     return jsonify({"message": "Logout Successfull"})
 
-
-@app.route('/api/users/<user_id>/posts', methods =['POST'])
-@login_required
+@app.route('/api/users/<user_id>/posts', methods =['POST','GET'])
 @requires_auth
 def add_post(user_id):
     form =  PostsForm()
@@ -142,15 +140,120 @@ def add_post(user_id):
             return jsonify({"message":"New Post Successfully created!"})
         else:
             return jsonify(errors=form_errors(form))
+    elif request.method == 'GET':
+        DB = connect_db()
 
-# @app.route('/api/return/data', methods=['GET'])
-# def show():
-#     DB = connect_db()
-#     cur = DB.cursor()
-#     cur.execute(f'select * from users')
-#     users = cur.fetchall()
+        cur = DB.cursor()
 
-    # return jsonify({"users": users})
+        cur.execute(f"SELECT * from posts where user_id = {user_id}")
+
+        keys = ["id", "user_id", "photo", "caption", "created_on", "u_user_id", "username", "user_photo", "likes"]
+
+        data= cur.fetchall()
+
+        return jsonify({"posts": data})
+
+@app.route('/api/v1/posts', methods=['GET'])
+@requires_auth
+def show():
+    DB = connect_db()
+
+    cur = DB.cursor()
+    cur2 = DB.cursor()
+
+    cur.execute(f'SELECT posts.*, users.id, users.username, users.photo, COALESCE(likes.total_likes, 0) AS total_likes FROM posts INNER JOIN users ON posts.user_id = users.id LEFT JOIN (SELECT post_id, COUNT(*) AS total_likes FROM likes GROUP BY post_id) AS likes ON posts.id = likes.post_id;')
+    # cur2.execute(f'select id, username from users')
+    cur2.execute(f'SELECT posts.*, users.id, users.username, users.photo FROM posts INNER JOIN users ON posts.user_id = users.id')
+
+    data= cur.fetchall()
+    info= cur2.fetchall()
+
+    keys = ["id", "user_id", "photo", "caption", "created_on", "u_user_id", "username", "user_photo", "likes"]
+    result = [dict(zip(keys, values)) for values in data]
+    
+    print(result)
+    return jsonify({"posts": result, "users": data})
+
+@app.route("/api/posts/<post_id>/like", methods=["POST"])
+@requires_auth
+def likePost(post_id):
+
+    posts = db.session.execute(db.select(Posts).filter_by(id=post_id)).scalar()
+
+    likes = Likes(user_id = current_user.id, post_id = posts.id)
+    db.session.add(likes)
+    db.session.commit()
+    
+    return jsonify({"Message": "Like Successfully Added", "Current User ID": current_user.id})
+
+    # post = db.session.query(Posts).filter_by(id=post_id).first()
+
+    # if current_user.is_authenticated():
+    #     return jsonify({"Message": "Success"})
+    # else:
+    #     return jsonify({"Message": "Failure"})
+
+@app.route('/api/users/<user_id>/count', methods =['GET'])
+@requires_auth
+def user_posts(user_id):
+    DB = connect_db()
+
+    cur = DB.cursor()
+
+    cur.execute(f"SELECT COUNT(*) from posts where user_id = {user_id}")
+
+    data= cur.fetchone()
+
+    return jsonify({"posts": data})
+
+@app.route('/api/users/<user_id>', methods =['GET'])
+@requires_auth
+def userAccount(user_id):
+    user = db.session.execute(db.select(Users).filter_by(id=user_id)).scalar()
+
+    if user is not None:
+        return jsonify({"message": "Successfull","user_id": user.id, "username": user.username, "firstname": user.firstname, "lastname": user.lastname, "location": user.location, "biography": user.biography, "photo": user.photo, "joined_on": user.joined_on})
+
+@app.route("/api/users/<user_id>/follow", methods=["POST"])
+@requires_auth
+def follow(user_id):
+
+    follows = Follows(user_id = user_id, follower_id = current_user.id)
+    db.session.add(follows)
+    db.session.commit()
+    return jsonify({"user": user_id, "current_user": current_user.id})
+
+@app.route("/api/users/<user_id>/follow/check", methods=["GET"])
+@requires_auth
+def follow_check(user_id):
+
+    DB = connect_db()
+
+    cur = DB.cursor()
+
+    cur.execute(f"SELECT * FROM follows WHERE user_id = {user_id} AND follower_id = {current_user.id}")
+
+    result = cur.fetchall()
+
+    # final = [dict(zip(keys, values)) for values in result]
+
+    if result:
+        return jsonify({"Message": "Success"})
+    else:
+        return jsonify({"Message": "Failure"})
+
+@app.route('/api/users/<user_id>/follower/count', methods =['GET'])
+@requires_auth
+def follows_count(user_id):
+    DB = connect_db()
+
+    cur = DB.cursor()
+
+    cur.execute(f"SELECT COUNT(*) from follows where user_id = {user_id}")
+
+    data= cur.fetchone()
+
+    return jsonify({"follows": data})
 ###
 # The functions below should be applicable to all Flask apps.
 ###

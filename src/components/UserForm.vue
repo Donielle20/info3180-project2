@@ -48,21 +48,14 @@
                 })
                 .then(function (data) {
 
-                    console.log(data.message);
+                    // console.log(data.message);
                     if (data.message == "Login Successfull")
                     {
                         getAuthorizationToken();
-                        window.location.href = 'http://localhost:5173/';
+                        window.location.href = 'http://localhost:5173/explore';
                         let list = [data.user_id,data.username,data.firstname,data.lastname,data.location,data.biography,data.photo,data.joined_on];
-                        // console.log(data.user_id);
-                        // console.log(data.username);
-                        // console.log(data.firstname);
-                        // console.log(data.lastname);
-                        // console.log(data.location);
-                        // console.log(data.biography);
-                        // console.log(data.photo);
-                        // console.log(data.joined_on);
                         localStorage.setItem('user', list);
+                        console.log(data.trouble);
                     }
                 })
                 .catch(function (error) {
@@ -94,5 +87,27 @@
 </script>
 
 <style>
-
+    .r_form{
+        width: 400px;
+    }
+    .container-fluid{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    form{
+        padding: 2em;
+        box-shadow: 3px 3px 3px rgb(191, 197, 199);
+        border-radius: 5px;
+        border: 2px solid rgb(191, 197, 199);
+        background-color: rgb(244, 242, 242);
+    }
+    #btn_length{
+        width: 100%;
+        height: 40px;
+        border-radius: 5px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+    }
 </style>

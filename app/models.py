@@ -76,7 +76,6 @@ class Posts(db.Model):
         
 class Likes(db.Model):
     __tablename__ = "likes"
-    __table_args__ = (db.UniqueConstraint('user_id', 'post_id', name='_user_post_uc'), )
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(Users.id, ondelete='CASCADE'), nullable=False)

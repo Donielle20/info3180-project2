@@ -24,11 +24,11 @@
               <RouterLink class="nav-link" to="/about">About</RouterLink>
             </li> -->
             <li v-if="!loggedin" class="nav-item">
-              <RouterLink class="nav-link active" to="/register/user">Register</RouterLink>
+              <RouterLink class="nav-link active" to="/register">Register</RouterLink>
             </li>
 
             <li v-if="loggedin" class="nav-item">
-              <RouterLink class="nav-link active" to="/user/logout">Explore</RouterLink>
+              <RouterLink class="nav-link active" to="/explore">Explore</RouterLink>
             </li>
 
             <li v-if="loggedin" class="nav-item">
@@ -36,10 +36,10 @@
             </li>
 
             <li v-if="loggedin" class="nav-item">
-              <RouterLink class="nav-link active" to="/user/logout">Logout</RouterLink>
+              <RouterLink class="nav-link active" to="/logout">Logout</RouterLink>
             </li>
             <li v-else class="nav-item">
-              <RouterLink class="nav-link active" to="/user/login">Login</RouterLink>
+              <RouterLink class="nav-link active" to="/login">Login</RouterLink>
             </li>
 
           </ul>
@@ -54,6 +54,8 @@
   import { ref } from "vue";
 
   let token = localStorage.getItem('token');
+  let user = localStorage.getItem('token');
+  // console.log(user);
   let loggedin = ref(false);
   // console.log(token);
   //localStorage.clear();
@@ -61,18 +63,18 @@
   if (token == null)
   {
     loggedin.value = false;
-    console.log(loggedin.value)
+    // console.log(loggedin.value)
   }
   else
   {
     loggedin.value = true;
-    console.log(loggedin.value)
+    // console.log(loggedin.value)
   }
 
 
   function logout()
   {
-    console.log("SUCCESS");
+    // console.log("SUCCESS");
   }
 </script>
 

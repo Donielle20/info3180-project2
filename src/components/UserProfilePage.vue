@@ -1,15 +1,15 @@
 <template>
     <div class="hold">
         <div class="profile_contain">
-            <img :src="`/uploads/${item[7]}`" alt="Profile Picture" class="image_profile">
+            <img :src="`/uploads/${item2[7]}`" alt="Profile Picture" class="image_profile">
             
             <div class="info">
-                <h2>{{item[2]}} {{item[3]}}</h2>
+                <h2>{{item2[2]}} {{item2[3]}}</h2>
                 <br>
-                <h6>{{item[4]}}, {{item[5]}}</h6>
-                <h6>Member since {{date[2]}} {{date[3]}}</h6>
+                <h6>{{item2[4]}}, {{item2[5]}}</h6>
+                <h6>Member since {{date2[2]}} {{date2[3]}}</h6>
                 <br>
-                <p>{{item[6]}}</p>
+                <p>{{item2[6]}}</p>
             </div>
 
             <div class="info_2">
@@ -23,12 +23,13 @@
                     <h2>Followers</h2>
                 </div>
                 
-                <!-- <br>
+                <br>
                 <br>
 
-                <div class="button">
-                    <button v-on:click="post" class="new_posts">New Post</button>
-                </div> -->
+                <div v-if="!same" class="button">
+                    <button v-if="!not_follow"  v-on:click="followUser(item2[0])" class="new_posts">Follow</button>
+                    <button v-if="not_follow" class="new_posts2">Following</button>
+                </div>
             </div>
         </div>
     </div>
@@ -38,24 +39,86 @@
 </template>
 
 <script setup>
-    import { ref } from "vue";
+    import { ref, onMounted  } from "vue";
+    let visit = localStorage.getItem('visit');
+    let item2 = visit.split(",");
+    let date2 = item2[9].split(" ");
+    let posts = ref([]);
+    let follow = ref([]);
+    let same = ref(false);
+    let allPosts = ref([]);
+    let not_follow = ref(false);
+
     let user = localStorage.getItem('user');
     let item = user.split(",");
     let date = item[9].split(" ");
-    let posts = ref([]);
-    let allPosts = ref([]);
+    let csrf_token = ref("");
     let follows_count = ref([]);
+
     let token = ref("");
     token.value = localStorage.getItem('token');
-    
-    // console.log(user);
-    function post()
-    {
-        window.location.href = 'http://localhost:5173/posts/new';
 
+    // console.log(item2[0]);
+
+    fetch("/api/users/"+ item2[0] +"/follow/check", {
+                method: 'GET',
+                headers: 
+                {
+                    'Authorization': "Bearer " + token.value
+                }
+            })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) { 
+                    if (data.Message == "Success")
+                    {
+                        console.log(data);
+                        not_follow.value = true;
+                        console.log(not_follow.value);                        
+                    }
+                    // posts.value = data.posts;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+
+    // follow.value = "Follow";
+
+    onMounted(() => {
+        getCsrfToken();
+    });
+
+    if (item[0] == item2[0])
+    {
+        same.value = true;
     }
 
-    fetch("/api/users/"+ item[0] + "/count", {
+    function followUser(id)
+    {
+        fetch("/api/users/" + id + "/follow", {
+                method: 'POST',
+                headers: 
+                {
+                    'X-CSRFToken': csrf_token.value,
+                    'Authorization': "Bearer " + token.value
+                }
+            })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) {
+                    window.location.href = 'http://localhost:5173/users/' + id;
+
+                    // console.log(data);
+                    // posts.value = data.posts;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+    }
+
+    fetch("/api/users/"+ item2[0] + "/count", {
                 method: 'GET',
                 headers: 
                 {
@@ -74,7 +137,7 @@
                     console.log(error);
                 });
 
-    fetch("/api/users/"+ item[0] + "/posts", {
+    fetch("/api/users/"+ item2[0] + "/posts", {
                 method: 'GET',
                 headers: 
                 {
@@ -91,9 +154,18 @@
                 .catch(function (error) {
                     console.log(error);
                 });
-    // console.log(item[0]);
+    
+    function getCsrfToken() 
+    {
+        fetch('/api/v1/csrf-token')
+            .then((response) => response.json())
+                .then((data) => {
+                    // console.log(data.csrf_token);
+                    csrf_token.value = data.csrf_token;
+        })
+    }
 
-    fetch("/api/users/" + item[0] + "/follower/count", {
+    fetch("/api/users/" + item2[0] + "/follower/count", {
                 method: 'GET',
                 headers: 
                 {
@@ -105,7 +177,8 @@
                 })
                 .then(function (data) {
                     follows_count.value = data.follows;
-                    // console.log(data.follows);
+                    console.log(data.follows);
+                    console.log(item[0]);
                 })
                 .catch(function (error) {
                     console.log(error);
@@ -113,6 +186,11 @@
 </script>
 
 <style>
+    .post_profile{
+        width: 430px;
+        height: 430px;
+        margin-left: 80px;
+    }
     .profile_contain{
         width: 90%;
         height: 70%;
@@ -127,6 +205,12 @@
         height: 400px;
         display: flex;
         justify-content: center;
+    }
+    .holdPosts{
+        width: 100%;
+        display: grid;
+        grid-template-columns: 470px 470px 470px;
+        row-gap: 50px;
     }
     .image_profile{
         border-radius: 50%;
@@ -161,15 +245,12 @@
         height: 45px;
         width: 100%;
     }
-    .post_profile{
-        width: 430px;
-        height: 430px;
-        margin-left: 80px;
-    }
-    .holdPosts{
+    .new_posts2{
+        background-color: #33e671;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        height: 45px;
         width: 100%;
-        display: grid;
-        grid-template-columns: 470px 470px 470px;
-        row-gap: 50px;
     }
 </style>

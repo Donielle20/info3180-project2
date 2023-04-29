@@ -18,20 +18,20 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue')
     },
     {
-      path: '/register/user',
-      name: 'register_user',
+      path: '/register',
+      name: 'register',
 
       component: () => import('../views/AddRegisterForm.vue')
     },
     {
-      path: '/user/login',
-      name: 'user_login',
+      path: '/login',
+      name: 'login',
 
       component: () => import('../views/AddUserForm.vue')
     },
     {
-      path: '/user/logout',
-      name: 'user_logout',
+      path: '/logout',
+      name: 'logout',
 
       component: () => import('../components/Logout.vue')
     },
@@ -40,6 +40,24 @@ const router = createRouter({
       name: 'user_profile',
 
       component: () => import('../components/ProfilePage.vue')
+    },
+    {
+      path: '/posts/new',
+      name: 'posts_new',
+
+      component: () => import('../components/NewPosts.vue')
+    },
+    {
+      path: '/explore',
+      name: 'explore',
+
+      component: () => import('../components/Explore.vue')
+    },
+    {
+      path: '/users/:user_id',
+      name: 'others_profile',
+
+      component: () => import('../components/UserProfilePage.vue')
     }
   ]
 })

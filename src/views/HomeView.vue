@@ -27,8 +27,8 @@ let message = ref("Hello World! This is a VueJS and Flask Starter Template.")
             <br>
 
             <div class="buttons">
-              <a href="/register/user" class="btn1">Register</a>
-              <a href="/user/login" class="btn2">Login</a>
+              <a href="http://localhost:5173/register" class="btn1">Register</a>
+              <a href="http://localhost:5173/login" class="btn2">Login</a>
             </div>
           </div>
           <!-- <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
